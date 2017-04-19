@@ -361,6 +361,10 @@ class _ProactorDatagramTransport(_ProactorBasePipeTransport):
             # close() or force_close() has been called on the bound endpoint
             return
 
+        if True:
+            self._loop._proactor.sendto(self._sock, data, addr=addr)
+            return
+
         self._buffer.appendleft((data, addr))
 
         if self._write_fut is None:

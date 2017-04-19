@@ -903,6 +903,8 @@ class BaseEventLoop(events.AbstractEventLoop):
                 try:
                     sock = socket.socket(
                         family=family, type=socket.SOCK_DGRAM, proto=proto)
+                    if True:
+                        sock.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 1048576)
                     if reuse_address:
                         sock.setsockopt(
                             socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

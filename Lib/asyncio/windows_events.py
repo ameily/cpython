@@ -482,7 +482,7 @@ class IocpProactor:
                 else:
                     raise
 
-        return self._register(ov, conn, finish_send)
+        #return self._register(ov, conn, finish_send)
 
     def send(self, conn, buf, flags=0):
         self._register_with_iocp(conn)
@@ -536,7 +536,8 @@ class IocpProactor:
         if conn.type == socket.SOCK_DGRAM:
             # WSAConnect will complete immediately for UDP sockets so we don't
             # need to register any IOCP operation
-            _overlapped.WSAConnect(conn.fileno(), address)
+            #_overlapped.WSAConnect(conn.fileno(), address)
+            conn.connect(address)
             fut = self._loop.create_future()
 
             fut.set_result(None)

@@ -42,6 +42,9 @@ enum {TYPE_NONE, TYPE_NOT_STARTED, TYPE_READ, TYPE_WRITE, TYPE_ACCEPT,
       TYPE_WAIT_NAMED_PIPE_AND_CONNECT, TYPE_READ_FROM, TYPE_WRITE_TO};
 
 
+static int SendToCount = 0;
+static int WouldBlockCount = 0;
+
 typedef struct {
     PyObject_HEAD
     OVERLAPPED overlapped;
@@ -1360,10 +1363,21 @@ Overlapped_WSASendTo(OverlappedObject *self, PyObject *args) {
 
     Py_BEGIN_ALLOW_THREADS
         ret = WSASendTo((SOCKET)handle, &wsabuf, 1, &written, flags,
-                        Address, AddressLength, &self->overlapped, NULL);
+                        Address, AddressLength, NULL, NULL);
     Py_END_ALLOW_THREADS
 
+    ++SendToCount;
     self->error = err = (ret == SOCKET_ERROR ? WSAGetLastError() : ERROR_SUCCESS);
+
+    if(err == WSAEWOULDBLOCK) {
+        ++WouldBlockCount;
+        self->error = err = ERROR_IO_PENDING;
+    }
+
+    if(SendToCount == (0xffff - 1)) {
+        printf("DEBUG: SendToCount: %d\n", SendToCount);
+        printf("DEBUG: WouldBlockCount: %d\n", WouldBlockCount);
+    }
 
     switch(err) {
     case ERROR_SUCCESS:
